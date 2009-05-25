@@ -5,7 +5,20 @@
 # copyright (c) 2009, Danny Arends
 # last modified Mrt, 2009
 # first written Mrt, 2009
+#
+#     This program is free software; you can redistribute it and/or
+#     modify it under the terms of the GNU General Public License, as
+#     published by the Free Software Foundation; either version 2 of
+#     the License, or (at your option) any later version. 
 # 
+#     This program is distributed in the hope that it will be useful,
+#     but without any warranty; without even the implied warranty of
+#     merchantability or fitness for a particular purpose.  See the
+#     GNU General Public License for more details.
+# 
+#     A copy of the GNU General Public License is available at
+#     http://www.r-project.org/Licenses/
+#
 # Part of the R/qtl package
 # Contains: PipelineMolgenis
 #
@@ -17,7 +30,7 @@
 #
 ######################################################################
 
-PipelineMolgenis <- function(DBmarkerID,DBtraitID,name="MQMResults",DBpath,each=0,n.clusters=2,...){
+PipelineMolgenis <- function(DBmarkerID,DBtraitID,multiC=TRUE,name="MQMResults",DBpath,each=0,n.clusters=2,...){
 	cat("------------------------------------------------------------------\n")
 	cat("Starting Molgenis <-> MQM <-> Molgenis automated pipeline\n")
 	cat("INFO: Molgenisserver:",DBpath,"\n")
@@ -42,13 +55,13 @@ PipelineMolgenis <- function(DBmarkerID,DBtraitID,name="MQMResults",DBpath,each=
 	AVG <- 0
 	LEFT <- 0
 	#TEST FOR SNOW CAPABILITIES
-	if(("snow" %in% installed.packages()[1:dim(installed.packages())[1]])){
+	if(("snow" %in% installed.packages()[1:dim(installed.packages())[1]]) && multiC){
 		start <- proc.time()
 		cat("INFO: Library snow found using ",n.clusters," Cores/CPU's/PC's for calculation.\n")
 		outcome <- NULL
 		library(snow)
 		cl <- makeCluster(n.clusters)
-		clusterEvalQ(cl, library(MQMpackage))
+		clusterEvalQ(cl, library(qtl))
 		outcome <- parLapply(cl,1:num_traits, snowCore,each=each,all_data=all_data,name=name,DBpath=DBpath)
 		stopCluster(cl)
 		end <- proc.time()
@@ -93,31 +106,4 @@ PipelineMolgenis <- function(DBmarkerID,DBtraitID,name="MQMResults",DBpath,each=
 	}
 }
 
-snowCore <- function(x,each,all_data,name,DBpath,...){
-	num_traits <- nphe(all_data)
-	b <- NULL
-	e <- NULL
-	b <- proc.time()
-	r_string <- NULL
-	r_string <- paste("------------------------------------------------------------------\n")
-	r_string <- paste(r_string,"INFO: Starting analysis of trait (",x,"/",num_traits,")\n")
-	r_string <- paste(r_string,"------------------------------------------------------------------\n")
-	if(each>1){
-		cof <- MQMCofactorsEach(all_data,each)
-		result <- scanMQM(all_data,cof,pheno.col=x,plot=F,verbose=F,...)
-	}else{
-		result <- scanMQM(all_data,pheno.col=x,plot=F,verbose=F,...)
-	}
-	try(ResultsToMolgenis(result, name,(x-1),DBpath, verbose=F),TRUE)
-	e <- proc.time()
-	r_string <- paste("------------------------------------------------------------------\n")
-	r_string <- paste(r_string,"INFO: Done with the analysis of trait (",x,"/",num_traits,")\n")	
-	r_string <- paste(r_string,"INFO: Calculation of trait",x,"took:",round((e-b)[3], digits=3)," seconds\n")
-	r_string <- paste(r_string,"------------------------------------------------------------------\n")
-	r_string
-}
-
-#x=1:num_traits
-#paste("script_",x,".R",sep="")
-
-
+# end of pipelineMolgenis.R
