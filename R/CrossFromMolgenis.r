@@ -96,25 +96,25 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 		#cat("INFO: Flipping traitset\n")
 		trait_data <- t(trait_data)
 	}
-	ourcat("INFO: Number of individuals in Marker set:",dim(marker_data)[2],"\n",a=verbose)
-	ourcat("INFO: Number of individuals in Phenotype set:",dim(trait_data)[2],"\n",a=verbose)
+	if(verbose)cat("INFO: Number of individuals in Marker set:",dim(marker_data)[2],"\n")
+	if(verbose)cat("INFO: Number of individuals in Phenotype set:",dim(trait_data)[2],"\n")
 	
 	#We assume that if we have IND in markers = IND in trait that individuals match
 	if(dim(marker_data)[2] > dim(trait_data)[2]){
-		ourcat("INFO: Scaling down the markerset\n",a=verbose)
+		if(verbose)cat("INFO: Scaling down the markerset\n")
 		matchV <- na.omit(match(colnames(trait_data),colnames(marker_data)))
 		marker_data <- marker_data[,matchV]
 		matchV <- na.omit(match(colnames(marker_data),colnames(trait_data)))
 		trait_data <- trait_data[,matchV]
 	}else{
-		ourcat("INFO: Scaling down the traitset\n",a=verbose)	
+		if(verbose)cat("INFO: Scaling down the traitset\n")	
 		matchV <- na.omit(match(colnames(marker_data),colnames(trait_data)))
 		trait_data <- trait_data[,matchV]
 		matchV <- na.omit(match(colnames(trait_data),colnames(marker_data)))
 		marker_data <- marker_data[,matchV]
 	}
-	ourcat("INFO: Number of individuals in Marker set:",dim(marker_data)[2],"\n",a=verbose)
-	ourcat("INFO: Number of individuals in Phenotype set:",dim(trait_data)[2],"\n",a=verbose)
+	if(verbose)cat("INFO: Number of individuals in Marker set:",dim(marker_data)[2],"\n")
+	if(verbose)cat("INFO: Number of individuals in Phenotype set:",dim(trait_data)[2],"\n")
 	
 	#Parse data towards the R/QTL format we need to convert all AA/AB/BB etc to 1,2,3
 	for(i in 1:dim(marker_data)[1]) {
@@ -125,11 +125,11 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 				repl <- TRUE
 			}
 			#RIL
-			if(!repl && as.character(marker_data[i,j]) == 'A'){
+			if(!repl && (as.character(marker_data[i,j]) == 'A' || as.character(marker_data[i,j]) == '1')){
 				marker_data[i,j] <- 1
 				repl <- TRUE
 			}
-			if(!repl && as.character(marker_data[i,j]) == 'B'){
+			if(!repl && (as.character(marker_data[i,j]) == 'B'|| as.character(marker_data[i,j]) == '2')){
 				marker_data[i,j] <- 2
 				repl <- TRUE
 			}
@@ -173,7 +173,7 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 	remFromChr <- NULL
 	for(i in 1:length(chr)) {
 		if(is.na(chr[i])){
-			ourcat("INFO: Gonna remove marker #",i,"Which is prob:",names(marker_data[,1])[i],"\n",a=verbose)
+			if(verbose)cat("INFO: Gonna remove marker #",i,"Which is prob:",names(marker_data[,1])[i],"\n")
 			remFromChr <- c(remFromChr,i)
 
 		}
