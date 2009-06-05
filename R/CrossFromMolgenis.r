@@ -70,7 +70,7 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 	
 	m_data_url <- paste(DBpath,"/find.datamatrix?id=",DBmarkerID,"&download=all",sep="")
 	#cat(m_data_url,"\n")
-	marker_data <- read.table(m_data_url,sep="\t")
+	marker_data <- read.table(m_data_url,sep="\t",header=T,row.names=1)
 	if(trait==0){
 		t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=all",sep="")
 	}else{
@@ -83,7 +83,7 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 		}
 	}
 	#cat(t_data_url,"\n")	
-	trait_data <- read.table(t_data_url,sep="\t")
+	trait_data <- read.table(t_data_url,sep="\t",header=T,row.names=1)
 	marker_info <- find.marker(.verbose=verbose)
 	marker_info_reduced <- marker_info[,c(1,2,10)]
 	
@@ -125,7 +125,7 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 				repl <- TRUE
 			}
 			#RIL
-			if(!repl && (as.character(marker_data[i,j]) == 'A' || as.character(marker_data[i,j]) == '1')){
+			if(!repl && (as.character(marker_data[i,j]) == 'A' || as.character(marker_data[i,j]) == '0')){
 				marker_data[i,j] <- 1
 				repl <- TRUE
 			}
@@ -195,13 +195,16 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 		length(cross$geno) <- i
 		for(j in which(chr==i)){
 				#For all markers on the chromosome do
-				#cat("INFO: marker:",j,names[j],"on chr",i,"at",loc[j],"\n")
+				cat("INFO: marker:",j,names[j],"on chr",i,"at",loc[j],"\n")
 				matrix <- rbind(matrix,marker_data[j,])
 				map <- rbind(map,loc[j])
 				namez <- rbind(namez,names[j])
 		}
-		mapi <- cbind(namez,map)	
-		resort <- na.omit(match(sort(as.double(mapi[,2])),as.double(mapi[,2])))
+		mapi <- cbind(namez,map)
+		aa <- mapi[,2]
+		names(aa) <- mapi[,1]
+		sort(aa)
+		resort <- which(names(aa) == mapi[,1])
 		map <- map[resort]
 		namez <- namez[resort]
 		matrix <- matrix[resort,]
