@@ -66,11 +66,12 @@ ResultsToMolgenis <- function(intervalQTLmap=NULL,name="MQMresultsTest",Trait_nu
 	#Get all the markers
 	markers <- find.marker(.verbose=verbose)
 	if(verbose)cat("INFO: Found",dim(markers)[1],"markers in the current database\n")
+	if(verbose)cat("INFO: num_pheno:",num_pheno,"phenotypes 2 upload\n")
+	if(verbose)cat("INFO: length:",length(intervalQTLmap),"should be above line\n")
 	cnt <- 0
-	if(num_pheno == 1){	
-		intervalQTLmap = list(intervalQTLmap)
-	}
 	for(j in 1:num_pheno){
+		cat("j value:",j,"\n")
+		cat(class(intervalQTLmap[[j]]),"\n")
 		for(i in 1:dim(intervalQTLmap[[j]])[1]) {
 			if(!rownames(intervalQTLmap[[j]])[i] %in% markers$name){
 				add.marker(name=rownames(intervalQTLmap[[j]])[i],chr=intervalQTLmap[[j]][i,"chr"],cm=intervalQTLmap[[j]][i,"pos (Cm)"],investigation_id=num$id)

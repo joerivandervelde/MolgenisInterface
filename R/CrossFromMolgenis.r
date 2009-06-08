@@ -203,12 +203,12 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 		mapi <- cbind(namez,map)
 		aa <- mapi[,2]
 		names(aa) <- mapi[,1]
-		sort(aa)
+		aa <- sort(aa)
 		resort <- which(names(aa) == mapi[,1])
 		map <- map[resort]
 		namez <- namez[resort]
 		matrix <- matrix[resort,]
-
+		cat(length(namez),"!!!!!!!!!!!!!\n")
 		#We got everything so lets start adding it to the cross object
 
 		cross$geno[[i]]$data <- t(matrix)
