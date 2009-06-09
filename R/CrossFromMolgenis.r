@@ -83,7 +83,11 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 		}
 	}
 	#cat(t_data_url,"\n")	
-	trait_data <- read.table(t_data_url,sep="\t",header=T,row.names=1)
+	trait_data <- read.table(t_data_url,sep="\t",header=T,row.names=1,colClasses=c("character"))
+	temp <- matrix(as.numeric(as.matrix(trait_data)),c(dim(trait_data)[1],dim(trait_data)[2]))
+	rownames(temp) <- rownames(trait_data)
+	colnames(temp) <- colnames(trait_data)
+	trait_data <- temp
 	marker_info <- find.marker(.verbose=verbose)
 	marker_info_reduced <- marker_info[,c(1,2,10)]
 	
