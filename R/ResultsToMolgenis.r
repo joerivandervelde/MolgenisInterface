@@ -70,8 +70,8 @@ ResultsToMolgenis <- function(intervalQTLmap=NULL,name="MQMresultsTest",Trait_nu
 	if(verbose)cat("INFO: length:",length(intervalQTLmap),"should be above line\n")
 	cnt <- 0
 	for(j in 1:num_pheno){
-		cat("j value:",j,"\n")
-		cat(class(intervalQTLmap[[j]]),"\n")
+		#cat("j value:",j,"\n")
+		#cat(class(intervalQTLmap[[j]]),"\n")
 		for(i in 1:dim(intervalQTLmap[[j]])[1]) {
 			if(!rownames(intervalQTLmap[[j]])[i] %in% markers$name){
 				add.marker(name=rownames(intervalQTLmap[[j]])[i],chr=intervalQTLmap[[j]][i,"chr"],cm=intervalQTLmap[[j]][i,"pos (Cm)"],investigation_id=num$id)
@@ -108,8 +108,11 @@ ResultsToMolgenis <- function(intervalQTLmap=NULL,name="MQMresultsTest",Trait_nu
 			rowindex <- c(rowindex,i-1)
 		}
 		if(verbose)cat("INFO: Trying to upload a trait ",colnam," to column:",colindex,"\n")  
-		add.decimaldataelement(data_id=aaa$id, col_name=colnam, row_name=names, rowindex=rowindex, colindex=colindex, value=values,.verbose=verbose)
-		if(verbose)cat("INFO: Uploaded",length(values)," QTL estimates\n")
+		if(add.decimaldataelement(data_id=aaa$id, col_name=colnam, row_name=names, rowindex=rowindex, colindex=colindex, value=values,.verbose=verbose)){
+			if(verbose)cat("INFO: Uploaded",length(values)," QTL estimates\n")
+		}else{
+			if(verbose)cat("WARN: FAILED uploading of",length(values)," QTL estimates\n")
+		}
 	}
 }
 
