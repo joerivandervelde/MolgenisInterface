@@ -1,11 +1,11 @@
 
-generateRunfile <- function(job, est){
+generateRunfile <- function(job, est,taskID){
 	#Generate a runfile to submit to the cluster
-	runfile <- paste("~/run/run",job,".sh",sep="")
+	runfile <- paste("~/run",taskID,"/run",job,".sh",sep="")
 	cat("#!/bin/sh","\n",sep="",file=runfile)
 	cat("#PBS -l nodes=1","\n",sep="",file=runfile,append=T)
 	cat("#PBS -l walltime=",est,"\n",sep="",file=runfile,append=T)
-	cat("cd $HOME/run","\n",sep="",file=runfile,append=T)
+	cat(paste("cd $HOME/run",taskID,sep=""),"\n",sep="",file=runfile,append=T)
 	cat("R CMD BATCH qtl",job,".R",sep="",file=runfile,append=T)
 	runfile
 }
@@ -19,7 +19,7 @@ Generate_Statement <- function(statement){
 
 generateQTLfile <- function(DBmarkerID = 0, DBtraitID = 0, DBpath = "", job, b_size,Ntraits,name,taskID,map,method,model){
 	#Generate a qtl<#>.R file to do the analysis on
-	qtlfile <- paste("~/run/qtl",job,".R",sep="")
+	qtlfile <- paste("~/run",taskID,"/qtl",job,".R",sep="")
 	cat("library(qtl,lib.loc='~/libs')","\n",sep="",file=qtlfile)
 	cat("library(RCurl,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
 	cat("library(molgenis,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
@@ -27,18 +27,18 @@ generateQTLfile <- function(DBmarkerID = 0, DBtraitID = 0, DBpath = "", job, b_s
 	cat("\nreport <- function(status,text){\n",file=qtlfile,append=T)
 	cat("\ttask <- ",taskID,"\n",file=qtlfile,append=T)
 	cat("\tjob <- ",job,"\n",file=qtlfile,append=T)
-	cat("\tlink <- paste(\"",DBpath,"/taskreporter?task=\",task,\"&job=\",job,\"&status=\",statuscode,\"&statustext=\",text,sep=\"\")\n",sep="",file=qtlfile,append=T)
+	cat("\tlink <- paste(\"",DBpath,"/taskreporter?task=\",task,\"&job=\",job,\"&statuscode=\",status,\"&statustext=\",text,sep=\"\")\n",sep="",file=qtlfile,append=T)
 	cat("\tgetURL(link)\n",file=qtlfile,append=T)
 	cat("\tif(status==-1){\n\t\t#q(\"no\")\n\t}\n",file=qtlfile,append=T)
 	cat("}\n\n",file=qtlfile,append=T)
 	cat("report(2,\"GonnaGetJob\")\n",file=qtlfile,append=T)
-	cat(Generate_Statement(paste("cross <- CrossFromMolgenis(DBmarkerID=",DBmarkerID,",DBtraitID=",DBtraitID,",DBpath='",DBpath,"',verbose=T)","\n",sep="")),file=qtlfile,append=T)
+	cat(Generate_Statement(paste("load(\"~/run",taskID,"/cross.RData\")","\n",sep="")),file=qtlfile,append=T)
 	cat("report(2,\"DoneGettingJob\")\n",file=qtlfile,append=T)
 	if(((job-1)*b_size)+b_size > Ntraits){
 		#final batch
-		cat("cross$pheno <- cross$pheno[",((job-1)*b_size)+1,":",Ntraits,"]","\n",sep="",file=qtlfile,append=T)
+		cat(Generate_Statement(paste("cross$pheno <- cross$pheno[",((job-1)*b_size)+1,":",Ntraits,"]","\n",sep="")),file=qtlfile,append=T)
 	}else{
-		cat("cross$pheno <- cross$pheno[",((job-1)*b_size)+1,":",((job-1)*b_size)+b_size,"]","\n",sep="",file=qtlfile,append=T)
+		cat(Generate_Statement(paste("cross$pheno <- cross$pheno[",((job-1)*b_size)+1,":",((job-1)*b_size)+b_size,"]","\n",sep="")),file=qtlfile,append=T)
 	}
 	cat(Generate_Statement(paste("results <- scanall(cross,multiC=FALSE,verbose=TRUE)","\n",sep="")),file=qtlfile,append=T)
 	cat("report(2,\"GonnaPutResult\")\n",file=qtlfile,append=T)
@@ -47,40 +47,56 @@ generateQTLfile <- function(DBmarkerID = 0, DBtraitID = 0, DBpath = "", job, b_s
 	cat("q(\"no\")","\n",sep="",file=qtlfile,append=T)
 }
 
-generateESTfile <- function(DBmarkerID = 0, DBtraitID = 0, DBpath = "",map,method,model){
+generateESTfile <- function(DBmarkerID = 0, DBtraitID = 0, DBpath = "",map,method,model,taskID){
 	#Generates a qtlfile to estimate walltime
-	qtlfile <- paste("~/run/ESTtime.R",sep="")
+	qtlfile <- paste("~/run",taskID,"/ESTtime.R",sep="")
 	cat("library(qtl,lib.loc='~/libs')","\n",sep="",file=qtlfile)
 	cat("library(RCurl,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
 	cat("library(molgenis,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
-	cat(Generate_Statement(paste("cross <- CrossFromMolgenis(DBmarkerID=",DBmarkerID,",DBtraitID=",DBtraitID,",DBpath='",DBpath,"')","\n",sep="")),file=qtlfile,append=T)
+	cat(Generate_Statement(paste("load(\"~/run",taskID,"/cross.RData\")","\n",sep="")),file=qtlfile,append=T)
 	cat("cross$pheno <- cross$pheno[1]","\n",sep="",file=qtlfile,append=T)
 	cat(Generate_Statement(paste("results <- ",map,"(cross,multiC=FALSE,verbose=TRUE)","\n",sep="")),file=qtlfile,append=T)
 	cat("q(\"no\")","\n",sep="",file=qtlfile,append=T)
 }
 
-prepare_cluster <- function(){
-	#Commands to execute to install R-libs
-	system("R CMD INSTALL ~/required/qtl_1.12-16.tar.gz --library=~/libs")
-	system("R CMD INSTALL ~/required/RCurl_0.91-0.tar.gz --library=~/libs")
-	system("R CMD INSTALL ~/required/molgenis_0.01.tar.gz --library=~/libs")
-	system("R CMD INSTALL ~/required/snow_0.3-3.tar.gz --library=~/libs")
-	cat("Deleting old run-files\n")
-	system("rm -rf ~/run")
-	system("rm -f run*")
-	cat("Resetting directory\n")
-	system("mkdir run")
-	system("cd run")
-	setwd("~/run")
+DownloadnSave <- function(DBmarkerID = 0, DBtraitID = 0, DBpath = "",taskID,njobs){
+	#Generates a qtlfile to estimate walltime
+	qtlfile <- paste("~/run",taskID,"/download.R",sep="")
+	cat("\nreport <- function(status,text){\n",file=qtlfile)
+	cat("\ttask <- ",taskID,"\n",file=qtlfile,append=T)
+	for(x in 1:njobs){
+		cat("\tlink <- paste(\"",DBpath,"/taskreporter?task=\",task,\"&job=",x,"&statuscode=\",status,\"&statustext=\",text,sep=\"\")\n",sep="",file=qtlfile,append=T)
+		cat("\tgetURL(link)\n",file=qtlfile,append=T)
+	}
+	cat("\tif(status==-1){\n\t\t#q(\"no\")\n\t}\n",file=qtlfile,append=T)
+	cat("}\n\n",file=qtlfile,append=T)
+	cat("library(qtl,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
+	cat("library(RCurl,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
+	cat("library(molgenis,lib.loc='~/libs')","\n",sep="",file=qtlfile,append=T)
+	cat(Generate_Statement(paste("cross <- CrossFromMolgenis(DBmarkerID=",DBmarkerID,",DBtraitID=",DBtraitID,",DBpath='",DBpath,"')","\n",sep="")),file=qtlfile,append=T)
+	cat(Generate_Statement(paste("save(cross,file=\"~/run",taskID,"/cross.RData\")","\n",sep="")),file=qtlfile,append=T)
+	cat("q(\"no\")","\n",sep="",file=qtlfile,append=T)
 }
 
-est_runtime <- function(njobs,DBmarkerID=0, DBtraitID = 0,ntraits=1, DBpath = "",num_per_run=1,map,method,model){
+prepare_cluster <- function(taskID){
+	#Commands to execute to install R-libs
+	#system("R CMD INSTALL ~/required/qtl_1.12-16.tar.gz --library=~/libs")
+	#system("R CMD INSTALL ~/required/RCurl_0.91-0.tar.gz --library=~/libs")
+	#system("R CMD INSTALL ~/required/molgenis_0.01.tar.gz --library=~/libs")
+	#system("R CMD INSTALL ~/required/snow_0.3-3.tar.gz --library=~/libs")
+	cat("Creating directory\n")
+	system(paste("mkdir run",taskID,sep=""))
+	system(paste("cd run",taskID,sep=""))
+	setwd(paste("~/run",taskID,sep=""))
+}
+
+est_runtime <- function(njobs,DBmarkerID=0, DBtraitID = 0,ntraits=1, DBpath = "",num_per_run=1,taskID,map,method,model){
 	#Crude estimation of time that it would take a job of num_per_run qtls to finish, we get all the data from molgenis and run 2 qtls profiles
+	generateESTfile(DBmarkerID, DBtraitID, DBpath,map,method,model,taskID)
 	s <- proc.time()
-	generateESTfile(DBmarkerID, DBtraitID, DBpath,map,method,model)
 	system("R CMD BATCH ESTtime.R")
 	e <- proc.time()
-	EST <- (num_per_run/10)*((e[3]-s[3])*1.25)
+	EST <- (num_per_run)*((e[3]-s[3])*1.25)
 	ESTtime <- sprintf("%02.f:%02.f:%02.f",EST %/% 3600, (EST%%3600) %/% 60, round(EST%%60, digits = 0))
 	ESTtime 
 }
@@ -102,7 +118,8 @@ report <- function(task,job,status,text){
 
 run_cluster <- function(name = "qtlTEST",DBmarkerID = 0, DBtraitID = 0,ntraits=1, njobs=1,DBpath = "",taskID="1",map=scanone,method="hk",model="normal"){
 	#initializes the cluster, installs R-libraries (could only be done once)
-	#Estimated time needed for each run (very crude)
+	#Downloads the datafile from molgenis and save it as a .RData
+	#Estimated time needed for each run (very crude) (ntraits in run + 25%)
 	#--Generate a QTLfile
 	#--Generate runfile for cluster
 	#--Sends the runfile as a job to the cluster
@@ -113,9 +130,13 @@ run_cluster <- function(name = "qtlTEST",DBmarkerID = 0, DBtraitID = 0,ntraits=1
 	}
 	nprun <- ceiling(ntraits/njobs)
 	cat("# of Traits:",ntraits,"\n# of Jobs",njobs,"# per run",nprun,"\n")
-	prepare_cluster()
+	prepare_cluster(taskID)
+	library(qtl,lib.loc='~/libs')
 	library(RCurl,lib.loc='~/libs')
-	est <- est_runtime(njobs,DBmarkerID,DBtraitID,ntraits,DBpath=DBpath,nprun,map,method,model)
+	library(molgenis,lib.loc='~/libs')
+	DownloadnSave(DBmarkerID,DBtraitID,DBpath=DBpath,taskID,njobs)
+	system("R CMD BATCH download.R")
+	est <- est_runtime(njobs,DBmarkerID,DBtraitID,ntraits,DBpath=DBpath,nprun,taskID,map,method,model)
 	if(is.null(name)) name="qtlTEST"
 	cat("Estimated for ",name,". Runtime per job=",est,"\n")
 	#ALL DONE NOW WE CAN GO INTO/run directory and make some calculations
@@ -123,11 +144,11 @@ run_cluster <- function(name = "qtlTEST",DBmarkerID = 0, DBtraitID = 0,ntraits=1
 		cat("Generating: ",x,".1/",njobs,"\n",sep="")
 		generateQTLfile(DBmarkerID=DBmarkerID, DBtraitID=DBtraitID, DBpath=DBpath, job=x, b_size=nprun,Ntraits=ntraits,name=name,taskID,map,method,model)
 		cat("Generating: ",x,".2/",njobs,"\n",sep="")
-		runfile <- generateRunfile(x,est)
+		runfile <- generateRunfile(x,est,taskID)
 		cat("Submitting: ",x,".3/",njobs,":",runfile,"\n",sep="")
 		#OLD call to sh to compute on the Sceduler
 		report(taskID,x,1,"Queue")
-		system(paste("sh ",runfile,sep=""))
+		#system(paste("sh ",runfile,sep=""))
 		system(paste("qsub ",runfile,sep=""))
 	}
 }
