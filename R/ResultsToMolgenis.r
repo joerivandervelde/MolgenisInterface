@@ -108,11 +108,7 @@ ResultsToMolgenis <- function(intervalQTLmap=NULL,name="MQMresultsTest",Trait_nu
 			rowindex <- c(rowindex,i-1)
 		}
 		if(verbose)cat("INFO: Trying to upload a trait ",colnam," to column:",colindex,"\n")  
-		if(add.decimaldataelement(data_id=aaa$id, col_name=colnam, row_name=names, rowindex=rowindex, colindex=colindex, value=values,.verbose=verbose)){
-			if(verbose)cat("INFO: Uploaded",length(values)," QTL estimates\n")
-		}else{
-			if(verbose)cat("WARN: FAILED uploading of",length(values)," QTL estimates\n")
-		}
+		add.decimaldataelement(data_id=aaa$id, col_name=colnam, row_name=names, rowindex=rowindex, colindex=colindex, value=values,.verbose=verbose)
 	}
 }
 
