@@ -1,19 +1,19 @@
 \name{ResultsToMolgenis}
 \alias{ResultsToMolgenis}
 
-\title{ ResultsToMolgenis - Helperfunction to store results from a MQM-qtl run into a molgenis database }
+\title{ ResultsToMolgenis - Store results from a MQM-qtl run into a molgenis database }
 \description{
-  Helperfunction to store results from a MQM-qtl run into a a molgenis database
+  Store results from a MQM-qtl run into a a molgenis database
 }
 \usage{
-ResultsToMolgenis(intervalQTLmap = NULL, name = NULL, DBpath = NULL, Fupdate = 0)
+	ResultsToMolgenis <- function(intervalQTLmap=NULL,name="MQMresultsTest",Trait_num=0,DBpath=NULL,verbose=TRUE)
 }
 \arguments{
   \item{intervalQTLmap}{ Results from either scanone, scanMQM or scanMQMall }
   \item{name}{ Name of the table to store the results in }
-  \item{Trait_num}{ Analysis is stored in this column in the database. This parameter is used for \link{PipelineMolgenis} }
+  \item{Trait_num}{ Under which column is the result stored }
   \item{DBpath}{ Path to the molgenis database }
-  \item{verbose}{ Print to screen (DEFAULT: TRUE) }
+  \item{verbose}{If TRUE, print tracing information}
 }
 \details{
  The library RCurl from bioconductor should be installed to use a molgenis interface.
@@ -35,16 +35,21 @@ If u find anything wrong with the algorithm please notify me at: \email{Danny.Ar
 }
 
 \seealso{ 
-\itemize{
-	\item \code{\link{scanMQM}} - Function called to do single trait analysis
-	\item \code{\link{CrossFromMolgenis}} - Function called to store results to a molgenis database
-	\item \code{\link{PipelineMolgenis}} - Automatic MQM-QTL analysis for Molgenis database systems		
-}
+	\itemize{
+		\item \code{\link[qtl]{scanone}} - Function called to do single trait QTL analysis
+		\item \code{\link[qtl]{scanall}} - Function called to do QTL analysis on multiple batched traits
+		\item \code{\link[qtl]{mqmall}} - Function called to do mqmQTL analysis on multiple batched traits
+		\item \code{\link{run_cluster}} - Automatic QTL analysis PBS clusters
+		\item \code{\link{CrossFromMolgenis}} - Function called to retrieve an object of type cross to a molgenis database
+		\item \code{\link{ResultsFromMolgenis}} - Function called to retrieve results to a molgenis database
+	}
 }
 \examples{
-cMol <- CrossFromMolgenis()			#Make a crossobject from the database
-result <- scanMQMall(cMol)			#Basic execution of scanMQMall
-ResultsToMolgenis(result,"QTL-mqm")	#Store the result from MQM into molgenis database
+	\dontrun{
+		cross <- CrossFromMolgenis()			#Make a crossobject from the database
+		result <- scanMQMall(cross)			#Basic execution of scanMQMall
+		ResultsToMolgenis(result,"QTL-mqm")	#Store the result from MQM into molgenis database
+	}
 }
 \references{
 	\url{http://www.molgenis.org} \& \url{http://www.Xgap.org} \& \url{http://www.omegahat.org/RCurl/}	

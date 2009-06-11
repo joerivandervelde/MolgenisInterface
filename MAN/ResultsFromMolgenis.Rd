@@ -1,9 +1,9 @@
 \name{ResultsFromMolgenis}
 \alias{ResultsFromMolgenis}
 
-\title{ ResultsFromMolgenis - Helperfunction to retrieve results from a molgenis database }
+\title{ ResultsFromMolgenis - Retrieve QTLresults from a molgenis database }
 \description{
-	Helperfunction to retrieve results from a molgenis database
+	Retrieve results from a molgenis database
 }
 \usage{
 ResultsFromMolgenis(DBqtlName = NULL, DBpath = NULL)
@@ -31,16 +31,21 @@ If u find anything wrong with the algorithm please notify me at: \email{Danny.Ar
 }
 \seealso{ 
 \itemize{
-	\item \code{\link{scanMQM}} - Function called to do single trait analysis
-	\item \code{\link{scanMQMall}} - Function called to do single trait analysis
-	\item \code{\link{CrossFromMolgenis}} - Function called to store results to a molgenis database
+	\item \code{\link[qtl]{scanone}} - Function called to do single trait QTL analysis
+	\item \code{\link[qtl]{scanall}} - Function called to do QTL analysis on multiple batched traits
+	\item \code{\link[qtl]{mqmall}} - Function called to do mqmQTL analysis on multiple batched traits
+	\item \code{\link{run_cluster}} - Automatic QTL analysis PBS clusters
+	\item \code{\link{CrossFromMolgenis}} - Function called to retrieve an object of type cross to a molgenis database
+	\item \code{\link{ResultsToMolgenis}} - Function called to store results to a molgenis database
 }
 }
 \examples{
-cMol <- CrossFromMolgenis()				#Make a crossobject from the database
-result <- scanMQMall(cMol)				#Basic execution of scanMQMall
-ResultsToMolgenis(result,"QTL-mqm")			#Store the result from MQM into molgenis database
-r_res <- ResultsFromMolgenis("QTL-mqm")		#Store the result from MQM into molgenis database
+\dontrun{
+	cross <- CrossFromMolgenis()				#Make a crossobject from the database
+	result <- mqmall(cross)				#Basic execution of scanMQMall
+	ResultsToMolgenis(result,"QTL-mqm")			#Store the result from MQM into molgenis database
+	r_res <- ResultsFromMolgenis("QTL-mqm")		#Retrieve the result from MQM into molgenis database
+}
 
 }
 \references{
