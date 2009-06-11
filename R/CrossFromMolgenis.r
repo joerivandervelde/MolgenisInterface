@@ -30,7 +30,7 @@
 #
 ######################################################################
 
-CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbose=T){
+CrossFromMolgenis <- function(DBmarkerID=0, DBtraitID=0, DBpath=NULL, verbose=TRUE){
 	library("RCurl")
 	if(!("RCurl" %in% names( getLoadedDLLs()))){
 		ourstop("Please install the package RCurl from bioconductor to use the molgenis interface\n")
@@ -71,17 +71,17 @@ CrossFromMolgenis <- function(DBmarkerID=0,DBtraitID=0,trait=0,DBpath=NULL,verbo
 	m_data_url <- paste(DBpath,"/find.datamatrix?id=",DBmarkerID,"&download=all",sep="")
 	#cat(m_data_url,"\n")
 	marker_data <- read.table(m_data_url,sep="\t",header=T,row.names=1)
-	if(trait==0){
-		t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=all",sep="")
-	}else{
-		if(trait_col != "Individual"){
-			#traits are in the cols
-			t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=some&coff=",trait,"&clim=1&roff=0&rlim=1000000",sep="")
-		}else{
-			#traits are in the rows
-			t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=some&coff=0&clim=1000000&roff=",trait,"&rlim=1",sep="")
-		}
-	}
+	t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=all",sep="")
+	#TODO: get a single trait, this should have a working find.datamatrix
+	#}else{
+	#	if(trait_col != "Individual"){
+	#		#traits are in the cols
+	#		t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=some&coff=",trait,"&clim=1&roff=0&rlim=1000000",sep="")
+	#	}else{
+	#		#traits are in the rows
+	#		t_data_url <- paste(DBpath,"/find.datamatrix?id=",DBtraitID,"&download=some&coff=0&clim=1000000&roff=",trait,"&rlim=1",sep="")
+	#	}
+	#}
 	#cat(t_data_url,"\n")	
 	trait_data <- read.table(t_data_url,sep="\t",header=T,row.names=1,colClasses=c("character"))
 	temp <- matrix(as.numeric(as.matrix(trait_data)),c(dim(trait_data)[1],dim(trait_data)[2]))
