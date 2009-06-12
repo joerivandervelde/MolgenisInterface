@@ -20,10 +20,17 @@
 
 	Index:
 	\preformatted{
-	run_cluster				run_cluster - Automated QTL analysis PBS clusters
+	run_cluster		run_cluster - Automated QTL analysis PBS clusters
 	CrossFromMolgenis       CrossFromMolgenis - Helperfunction to create a cross-object from a molgenis database
 	ResultsFromMolgenis     ResultsFromMolgenis - Helperfunction to retrieve results from a molgenis database
 	ResultsToMolgenis       ResultsToMolgenis - Helperfunction to store results into a molgenis database
+	DownloadnSave           DownloadnSave - R/qtl analysis on a PBS cluster
+	est_runtime             est_runtime - Estimates runtime by executing the file produced by generateESTfile
+	generateESTfile         generateESTfile - Generates a QTL file to estimate runtime for each item
+	generateQTLfile         generateQTLfile - Generates a QTL file
+	generateRUNfile         generateRUNfile - Generates a .sh file with job description to be submitted to PBS
+	molgenis                Interface between molgenis & r/qtl
+	prepare_cluster         prepare_cluster - Setup of foldersystem
 	}
 	\itemize{
 		\item 1A: Data retrieval from a molgenis database 
@@ -63,6 +70,12 @@ Maintainer: Danny Arends \email{Danny.Arends@gmail.com}
 	\item \code{\link[qtl]{scanone}} - Function called to do single trait QTL analysis
 	\item \code{\link[qtl]{scanall}} - Function called to do QTL analysis on multiple batched traits
 	\item \code{\link[qtl]{mqmall}} - Function called to do mqmQTL analysis on multiple batched traits
+	\item \code{\link{prepare_cluster}} - Setup of foldersystem
+	\item \code{\link{DownloadnSave}} - R/qtl analysis on a PBS cluster
+	\item \code{\link{generateESTfile}} - Generates a QTL file to estimate runtime for each item
+	\item \code{\link{est_runtime}} - Estimates runtime by executing the file produced by generateESTfile
+	\item \code{\link{generateQTLfile}} - Generates a QTL file
+	\item \code{\link{generateRUNfile}} - Generates a .sh file with job description to be submitted to PBS
 	\item \code{\link{run_cluster}} - Automated QTL analysis PBS clusters
 	\item \code{\link{CrossFromMolgenis}} - Function called to retrieve an object of type cross to a molgenis database
 	\item \code{\link{ResultsFromMolgenis}} - Function called to retrieve results to a molgenis database
