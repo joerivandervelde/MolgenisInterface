@@ -55,12 +55,12 @@ ResultsToMolgenis <- function(intervalQTLmap=NULL,name="MQMresultsTest",Trait_nu
 	}
 	investi <- find.investigation(.verbose=verbose)
 	if(verbose)cat("INFO: Found",dim(investi)[1],"investigations in the current database\n")
-	if("MQMQTL" %in% investi$name){
-		if(verbose)cat("INFO: Found MQMQTL investigation in the current database\n")
-		num <- find.investigation(name="MQMQTL",.verbose=verbose)
+	if("QTL" %in% investi$name){
+		if(verbose)cat("INFO: Found QTL investigation in the current database\n")
+		num <- find.investigation(name="QTL",.verbose=verbose)
 	}else{
-		if(verbose)cat("INFO: Created a new instance of an MQMQTL investigation in the current database\n")
-		num <- add.investigation(name="MQMQTL",.verbose=verbose)
+		if(verbose)cat("INFO: Created a new instance of an QTL investigation in the current database\n")
+		num <- add.investigation(name="QTL",.verbose=verbose)
 	}
 	
 	#Get all the markers
