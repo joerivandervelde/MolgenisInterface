@@ -1,3 +1,4 @@
+
 # static helper functions 
 MOLGENIS.connect <- function( servletURL, dbUser=NULL )
 {
@@ -7,7 +8,6 @@ MOLGENIS.connect <- function( servletURL, dbUser=NULL )
     # We check and prepare the argument variables
     if( missing( servletURL ) ) {
         stop( "arg1: You should provide an servletURL (e.g. \"http://localhost:8080/molgenis4gg\")\n" )
-
     }
     if( is.null( dbUser ) ) {
         dbUser <- ""
@@ -71,7 +71,7 @@ MOLGENIS.find<-function( entityName, conditions, .verbose=T )
   
     # We query the server
 
-    suppressWarnings(outputString <- postForm( uri , .params = filter ))
+    outputString <- postForm( uri , .params = filter )
 	MOLGENIS.debug("Send find to server and got to parse in", format(difftime(Sys.time(),starttime, units="sec"), digits=3),"sec.\n")    
 	
     # Check for errors
@@ -127,7 +127,7 @@ MOLGENIS.update <- function(entityName, dataMatrix, action, is_matrix=F, row_typ
         data_file = fileUpload(filename=temp, contentType="text/plain")
     )
     
-    #if small set, don't use file upload)
+    #if small set, do not use file upload)
     if(nrow(dataMatrix)<20000)
     {
         handle<-file(temp)
@@ -152,7 +152,7 @@ MOLGENIS.update <- function(entityName, dataMatrix, action, is_matrix=F, row_typ
         result = TRUE
         
         # let result hold updated data (if any lines available)
-        line <- readLines(handle, n=1, ok=TRUE, warn=FALSE)
+        line <- readLines(handle, n=1, ok=TRUE, warn=TRUE)
         #cat("what is wrong with line '",line,"' of type ",typeof(line), sep="")
         if(line != "")
         {
@@ -166,7 +166,8 @@ MOLGENIS.update <- function(entityName, dataMatrix, action, is_matrix=F, row_typ
         return (result);    	
     }   
     else {
-        cat("\n",status,"\n", sep="")
-        return (FALSE);
+        #cat("\n",status,"\n", sep="")
+        stop(status)
+        #return (FALSE);
     }  
 }
